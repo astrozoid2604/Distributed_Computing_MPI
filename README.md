@@ -75,7 +75,113 @@ mpiexec -n 2 python script.py
 
 ---
 
-# Sanity Check Result
+# Data Preprocessing
+
+- Standardized input features:
+    - Ensured input features follow a normal distribution N(μ=0, σ=1) for faster convergence
+    - Input features includes all columns except the target feature (`medianHouseValue`), and unique identifiers (`latitude`, `longitude`). 
+    - Norminal feature (`oceanProximity`) also belongs to input features but it’s not standardized
+
+- One-hot encoded the nominal feature (`oceanProximity`):
+    - Converted `oceanProximity` to numerical values using one-hot encoding.
+
+- Split data into training and testing sets (70:30 ratio):
+    - Used random state 42 to split 70:30 between training and testing sets
+
+---
+
+# Kernel Functions
+
+- Implemented various kernel functions: RBF (Radial Basis Function), Linear, Polynomial, Sigmoid, and Laplacian.
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+**RBF Kernel:**
+```html
+<script type="math/tex; mode=display">
+K(x_i, x_j) = \exp(-\gamma \| x_i - x_j \|^2)
+</script>
+```
+
+**Linear Kernel*8
+```html
+<script type="math/tex; mode=display">
+K(x_i, x_j) = x_i \cdot x_j
+</script>
+```
+
+**Polynomial Kernel**
+```html
+<script type="math/tex; mode=display">
+K(x_i, x_j) = (x_i \cdot x_j + coef_0)^d
+</script>
+```
+
+**Sigmoid Kernel**
+```html
+<script type="math/tex; mode=display">
+K(x_i, x_j) = \tanh(\gamma x_i \cdot x_j + coef_0)
+</script>
+
+```
+
+**Laplacian Kernel**
+```html
+<script type="math/tex; mode=display">
+K(x_i, x_j) = \exp(-\gamma \| x_i - x_j \|)
+</script>
+```
+
+---
+
+# Parallel Kernel Matrix Computation
+
+- MPI: A standardized and portable message-parsing system designed to function on parallel computing architectures.
+- Purpose: Enables efficient communication between multiple processes running on different nodes of a cluster.
+- Steps in parallel kernel matrix computation:
+    1. Initialization
+        - MPI Communicator: `comm = MPI.COMM_WORLD`
+        - Rank: `rank .= com.Get_rank()` # Identifies the process ID
+        - Size: `size = comm.Get_size()` # number of processes
+    1. Data Distribution
+        - Training Data: Split data evenly across all processes.
+        - Local Data: Each process works on a subset of the data (`local X`)
+    1. Kernel Matrix Calculation
+        - Local Computation
+            - Each process computes its portion of the kernel matrix for its local data.
+            - Example: `local K = kernel_base(local_X, local_X, **kwargs)`
+        - Inter-Process Communication:
+            - Processes exchange local data segments with each other.
+            - Use of non-blocking sends (`comm.Issend`) and receives (`comm.Recv`) to share data efficiently.
+    1. Combining Results
+        - Local Results Aggregation
+            - Each process computes kernel values for its data against data recieved from other processes.
+        - Global Kernel Matrix
+            - Root process (`rank == 0`) gathers all local kernel matrices into the global kernel matrix (`comm.Gather`)
+    1. Synchronization
+        - Barrier: `comm.Barrier()` ensures all processes complete their tasks before proceeding.
+        - Final Kernel Matrix: Constructed on the root process, combining results from all processes.
+
+---
+
+# Hyperparameter Tuning
+
+- Optimizations: Iterated through combinations of hyperparameters and selected parameters with the lowest RMSE.
+- Note: Only RBF Kernel and Laplacian Kernel underwent fine-grained tuning range while others stopped at coares-grained tuning range as said 2 Kernels have similar best results from coarse-grained tuning range.
+
+![tuning_range](tuning_range.PNG)
+
+---
+
+# Result
+
+![result](result.PNG)
+
+---
+
+# Sanity Check
 
 - As part of code validation, so far it has been verified that the RMSE results are the same between the following 2 executions:
     - KRR in non-MPI Environment (Using off-the-shelf Python package `sklearn.kernel_ridge.KernelRidge`)
@@ -84,4 +190,19 @@ mpiexec -n 2 python script.py
 ![single_processor_validation](single_processor_validation.png)
 
 - The KRR in MPI Environment with multiple processors has been validated to successfully with matching RMSE results.
+
+---
+
+# Conclusion
+
+- Summary: 
+    - Successfully implemented and evaluated various kernel ridge regression models.
+
+- Best Performance:
+    - RBF Kernel with Gamma=0.08 and Alpha=0.014 attained lowest RMSE_train=55805.7675 and RMSE_test=58494.1907
+    - This makes sense as RBF Kernel implicitly maps the input data to infinite-dimensional feature space and therefore it has the best expressive power to model very complex relationship in the data among other Kernels.
+
+- Future Work: 
+    - Explore additional kernels and further optimize hyperparameters.
+
 
