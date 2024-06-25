@@ -94,45 +94,15 @@ mpiexec -n 2 python script.py
 
 - Implemented various kernel functions: RBF (Radial Basis Function), Linear, Polynomial, Sigmoid, and Laplacian.
 
-<script type="text/javascript" async
-  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
-</script>
-
-**RBF Kernel:**
-```html
-<script type="math/tex; mode=display">
-K(x_i, x_j) = \exp(-\gamma \| x_i - x_j \|^2)
-</script>
-```
-
-**Linear Kernel*8
-```html
-<script type="math/tex; mode=display">
-K(x_i, x_j) = x_i \cdot x_j
-</script>
-```
-
-**Polynomial Kernel**
-```html
-<script type="math/tex; mode=display">
-K(x_i, x_j) = (x_i \cdot x_j + coef_0)^d
-</script>
-```
-
-**Sigmoid Kernel**
-```html
-<script type="math/tex; mode=display">
-K(x_i, x_j) = \tanh(\gamma x_i \cdot x_j + coef_0)
-</script>
-
-```
-
-**Laplacian Kernel**
-```html
-<script type="math/tex; mode=display">
-K(x_i, x_j) = \exp(-\gamma \| x_i - x_j \|)
-</script>
-```
+$$
+\begin{align*}
+\text{RBF Kernel:} \quad K(x_i, x_j) &= \exp(-\gamma \| x_i - x_j \|^2) \\
+\text{Linear Kernel:} \quad K(x_i, x_j) &= x_i \cdot x_j \\
+\text{Polynomial Kernel:} \quad K(x_i, x_j) &= (x_i \cdot x_j + coef_0)^d \\
+\text{Sigmoid Kernel:} \quad K(x_i, x_j) &= \tanh(\gamma x_i \cdot x_j + coef_0) \\
+\text{Laplacian Kernel:} \quad K(x_i, x_j) &= \exp(-\gamma \| x_i - x_j \|)
+\end{align*}
+$$
 
 ---
 
@@ -171,13 +141,13 @@ K(x_i, x_j) = \exp(-\gamma \| x_i - x_j \|)
 - Optimizations: Iterated through combinations of hyperparameters and selected parameters with the lowest RMSE.
 - Note: Only RBF Kernel and Laplacian Kernel underwent fine-grained tuning range while others stopped at coares-grained tuning range as said 2 Kernels have similar best results from coarse-grained tuning range.
 
-![tuning_range](tuning_range.PNG)
+![tuning_range](tuning_range.png)
 
 ---
 
 # Result
 
-![result](result.PNG)
+![result](result.png)
 
 ---
 
